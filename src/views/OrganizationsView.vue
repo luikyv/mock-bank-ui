@@ -17,25 +17,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import LayoutComponent from '../components/LayoutComponent.vue'
-import RowComponent from '../components/RowComponent.vue'
-import type { Organization } from '../types'
-import { useStore } from '../store'
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import LayoutComponent from "../components/LayoutComponent.vue";
+import RowComponent from "../components/RowComponent.vue";
+import type { Organization } from "../types";
+import { useStore } from "../stores";
 
-const router = useRouter()
-const store = useStore()
-const user = computed(() => store.user)
+const router = useRouter();
+const store = useStore();
+const user = computed(() => store.user);
 
 const goToOrganization = (org: Organization) => {
   return async () => {
-    store.org = org
-    router.push(`/orgs/${org.id}`)
-  }
-}
+    store.org = org;
+    router.push(`/orgs/${org.id}`);
+  };
+};
 
 onMounted(() => {
-  store.org = null
-})
+  store.org = null;
+});
 </script>

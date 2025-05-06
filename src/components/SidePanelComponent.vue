@@ -1,8 +1,9 @@
 <template>
+  <!-- TODO: Move this transition to other place -->
   <transition name="slide-left">
     <div
       v-if="selectedResource"
-      class="fixed top-0 right-0 h-full bg-white shadow-xl border-l border-gray-200 z-50 overflow-y-auto"
+      class="absolute right-0 top-0 bottom-0 bg-white shadow-xl border-l border-gray-200 z-50 overflow-y-auto"
       :style="{ width: panelWidth + 'px' }"
     >
       <!-- Resize handle -->
@@ -12,7 +13,9 @@
       ></div>
 
       <!-- Header -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+      <div
+        class="flex justify-between items-center p-4 border-b border-gray-200"
+      >
         <h2 class="text-lg font-semibold">{{ title }}</h2>
         <button
           @click="$emit('close')"
@@ -23,52 +26,60 @@
         </button>
       </div>
 
-      <!-- Content slot -->
-      <div class="p-4 space-y-4 text-sm">
-        <slot />
+      <!-- Content + Actions Wrapper -->
+      <div class="flex flex-col h-[calc(100%-64px)] overflow-hidden">
+        <!-- Scrollable content -->
+        <div class="flex-1 overflow-y-auto px-4 py-4 text-sm">
+          <slot />
+        </div>
+
+        <!-- Bottom actions -->
+        <div class="bg-gray-100 border-t border-gray-300 px-4 py-2">
+          <slot name="panel-actions" />
+        </div>
       </div>
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount } from "vue";
 
 defineProps<{
-  title: string
-  selectedResource: unknown
-}>()
+  title: string;
+  selectedResource: unknown;
+}>();
 
-const panelWidth = ref(400)
-let isResizing = false
+const panelWidth = ref(400);
+let isResizing = false;
 
 const startResizing = () => {
-  isResizing = true
-  document.body.classList.add('no-select')
-  document.addEventListener('mousemove', resizePanel)
-  document.addEventListener('mouseup', stopResizing)
-}
+  isResizing = true;
+  document.body.classList.add("no-select");
+  document.addEventListener("mousemove", resizePanel);
+  document.addEventListener("mouseup", stopResizing);
+};
 
 const resizePanel = (e: MouseEvent) => {
   if (isResizing) {
-    const newWidth = window.innerWidth - e.clientX
+    const newWidth = window.innerWidth - e.clientX;
     if (newWidth >= 300 && newWidth <= 800) {
-      panelWidth.value = newWidth
+      panelWidth.value = newWidth;
     }
   }
-}
+};
 
 const stopResizing = () => {
-  isResizing = false
-  document.body.classList.remove('no-select')
-  document.removeEventListener('mousemove', resizePanel)
-  document.removeEventListener('mouseup', stopResizing)
-}
+  isResizing = false;
+  document.body.classList.remove("no-select");
+  document.removeEventListener("mousemove", resizePanel);
+  document.removeEventListener("mouseup", stopResizing);
+};
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousemove', resizePanel)
-  document.removeEventListener('mouseup', stopResizing)
-})
+  document.removeEventListener("mousemove", resizePanel);
+  document.removeEventListener("mouseup", stopResizing);
+});
 </script>
 
 <style scoped>

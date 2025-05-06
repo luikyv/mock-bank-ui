@@ -37,7 +37,9 @@
       <form v-if="newUser" @submit.prevent="createUser">
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Name</label
+            >
             <input
               v-model="newUser.name"
               type="text"
@@ -46,7 +48,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Username</label
+            >
             <input
               v-model="newUser.username"
               type="text"
@@ -55,7 +59,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >CPF</label
+            >
             <input
               v-model="newUser.cpf"
               type="text"
@@ -85,7 +91,9 @@
         <div class="space-y-4 overflow-y-auto">
           <div>
             <div class="text-gray-500 text-xs uppercase">ID</div>
-            <div class="font-mono text-sm text-gray-800">{{ selectedUser.id }}</div>
+            <div class="font-mono text-sm text-gray-800">
+              {{ selectedUser.id }}
+            </div>
           </div>
 
           <div>
@@ -103,12 +111,12 @@
             <div class="text-gray-800">{{ selectedUser.cpf }}</div>
           </div>
         </div>
-
-        <!-- Bottom-aligned actions -->
-        <div class="mt-auto pt-6 flex gap-2">
+      </div>
+      <template #panel-actions>
+        <div class="flex justify-between w-full">
           <button
             @click="goToUserResources"
-            class="bg-[#497E94] hover:bg-[#3F3F3F] text-white text-sm font-medium py-2 px-4 rounded"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded"
           >
             Go To Resources
           </button>
@@ -119,74 +127,74 @@
             Delete User
           </button>
         </div>
-      </div>
+      </template>
     </SidePanelComponent>
   </LayoutComponent>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useRouter } from 'vue-router'
-import LayoutComponent from '../components/LayoutComponent.vue'
-import RowComponent from '../components/RowComponent.vue'
-import SidePanelComponent from '../components/SidePanelComponent.vue'
-import type { MockUser, CreateMockUserRequest } from '../types'
-import { fetchMockUsers, createMockUser, deleteMockUser } from '../utils'
-import { useStore } from '../store'
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
+import LayoutComponent from "../components/LayoutComponent.vue";
+import RowComponent from "../components/RowComponent.vue";
+import SidePanelComponent from "../components/SidePanelComponent.vue";
+import type { MockUser, CreateMockUserRequest } from "../types";
+import { fetchMockUsers, createMockUser, deleteMockUser } from "../utils";
+import { useStore } from "../stores";
 
-const route = useRoute()
-const router = useRouter()
-const store = useStore()
-const users = ref<MockUser[]>([])
-const orgId = route.params.orgId as string
+const route = useRoute();
+const router = useRouter();
+const store = useStore();
+const users = ref<MockUser[]>([]);
+const orgId = route.params.orgId as string;
 
-const selectedUser = ref<MockUser | null>(null)
-const newUser = ref<CreateMockUserRequest | null>(null)
-const message = ref<string | null>(null)
+const selectedUser = ref<MockUser | null>(null);
+const newUser = ref<CreateMockUserRequest | null>(null);
+const message = ref<string | null>(null);
 
-const sidebarLinks = [{ label: 'Users', path: `/orgs/${orgId}/users` }]
+const sidebarLinks = [{ label: "Users", path: `/orgs/${orgId}/users` }];
 
 const selectUser = (user: MockUser) => {
   return () => {
-    selectedUser.value = user
-  }
-}
+    selectedUser.value = user;
+  };
+};
 
 const createUser = async () => {
   if (newUser.value == null) {
-    return
+    return;
   }
 
-  await createMockUser(newUser.value, orgId)
-  users.value = await fetchMockUsers(orgId)
-  newUser.value = null
-  message.value = 'User created successfully!'
+  await createMockUser(newUser.value, orgId);
+  users.value = await fetchMockUsers(orgId);
+  newUser.value = null;
+  message.value = "User created successfully!";
 
   setTimeout(() => {
-    message.value = null
-  }, 3000)
-}
+    message.value = null;
+  }, 3000);
+};
 
 const deleteUser = async () => {
-  if (!selectedUser.value) return
+  if (!selectedUser.value) return;
 
-  await deleteMockUser(selectedUser.value.id, orgId)
-  users.value = await fetchMockUsers(orgId)
-  selectedUser.value = null
-  message.value = 'User deleted successfully!'
+  await deleteMockUser(selectedUser.value.id, orgId);
+  users.value = await fetchMockUsers(orgId);
+  selectedUser.value = null;
+  message.value = "User deleted successfully!";
 
   setTimeout(() => {
-    message.value = null
-  }, 3000)
-}
+    message.value = null;
+  }, 3000);
+};
 
 function goToUserResources() {
-  store.mockUser = selectedUser.value
-  router.push(`/orgs/${orgId}/users/${selectedUser.value?.id}`)
+  store.mockUser = selectedUser.value;
+  router.push(`/orgs/${orgId}/users/${selectedUser.value?.id}`);
 }
 
 onMounted(async () => {
-  users.value = await fetchMockUsers(orgId)
-})
+  users.value = await fetchMockUsers(orgId);
+});
 </script>
