@@ -1,45 +1,39 @@
 <template>
-  <!-- TODO: Move this transition to other place -->
-  <transition name="slide-left">
+  <div
+    class="absolute right-0 top-0 bottom-0 bg-white shadow-xl border-l border-gray-200 z-50 overflow-y-auto"
+    :style="{ width: panelWidth + 'px' }"
+  >
+    <!-- Resize handle -->
     <div
-      v-if="selectedResource"
-      class="absolute right-0 top-0 bottom-0 bg-white shadow-xl border-l border-gray-200 z-50 overflow-y-auto"
-      :style="{ width: panelWidth + 'px' }"
-    >
-      <!-- Resize handle -->
-      <div
-        class="absolute top-0 left-0 h-full w-1 cursor-ew-resize bg-transparent z-50"
-        @mousedown="startResizing"
-      ></div>
+      class="absolute top-0 left-0 h-full w-1 cursor-ew-resize bg-transparent z-50"
+      @mousedown="startResizing"
+    ></div>
 
-      <!-- Header -->
-      <div
-        class="flex justify-between items-center p-4 border-b border-gray-200"
+    <!-- Header -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold">{{ title }}</h2>
+      <button
+        @click="$emit('close')"
+        class="text-gray-500 text-2xl hover:text-gray-700"
+        aria-label="Close"
       >
-        <h2 class="text-lg font-semibold">{{ title }}</h2>
-        <button
-          @click="$emit('close')"
-          class="text-gray-500 text-2xl hover:text-gray-700"
-          aria-label="Close"
-        >
-          ×
-        </button>
+        ×
+      </button>
+    </div>
+
+    <!-- Content + Actions Wrapper -->
+    <div class="flex flex-col h-[calc(100%-64px)] overflow-hidden">
+      <!-- Scrollable content -->
+      <div class="flex-1 overflow-y-auto px-4 py-4 text-sm">
+        <slot />
       </div>
 
-      <!-- Content + Actions Wrapper -->
-      <div class="flex flex-col h-[calc(100%-64px)] overflow-hidden">
-        <!-- Scrollable content -->
-        <div class="flex-1 overflow-y-auto px-4 py-4 text-sm">
-          <slot />
-        </div>
-
-        <!-- Bottom actions -->
-        <div class="bg-gray-100 border-t border-gray-300 px-4 py-2">
-          <slot name="panel-actions" />
-        </div>
+      <!-- Bottom actions -->
+      <div class="bg-gray-100 border-t border-gray-300 px-4 py-2">
+        <slot name="panel-actions" />
       </div>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -47,7 +41,6 @@ import { ref, onBeforeUnmount } from "vue";
 
 defineProps<{
   title: string;
-  selectedResource: unknown;
 }>();
 
 const panelWidth = ref(400);

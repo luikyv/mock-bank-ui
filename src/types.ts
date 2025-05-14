@@ -9,7 +9,7 @@ export interface User {
   organizations: Record<string, Organization>;
 }
 
-export interface CreateMockUserRequest {
+export interface MockUserRequest {
   username: string;
   name: string;
   cpf: string;
@@ -45,7 +45,25 @@ export enum AccountType {
   PREPAID = "CONTA_PAGAMENTO_PRE_PAGA",
 }
 
+export enum AccountSubtype {
+  INDIVIDUAL = "INDIVIDUAL",
+  JOINT_SIMPLE = "CONJUNTA_SIMPLES",
+  JOINT_SOLIDARY = "CONJUNTA_SOLIDARIA",
+}
+
 export interface Account {
   accountId: string;
+  number: string;
+  checkDigit: string;
+  branchCode: string | null;
   type: AccountType;
+  subtype: AccountSubtype;
+}
+
+export interface AccountRequest {
+  number: string;
+  checkDigit: string;
+  branchCode: string | null;
+  type: AccountType;
+  subtype: AccountSubtype;
 }

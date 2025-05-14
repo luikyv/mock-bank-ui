@@ -1,11 +1,12 @@
 <template>
   <div class="min-h-screen flex">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-[#497E94] text-white flex flex-col p-6 space-y-6">
+    <!-- Side Bar -->
+    <aside
+      class="w-[12vw] min-w-[200px] max-w-[300px] bg-[#497E94] text-white flex flex-col p-6 space-y-6"
+    >
       <div>
         <h2 class="text-xl font-bold mb-1">MockBank</h2>
       </div>
-
       <nav class="space-y-2">
         <router-link
           v-for="link in links"
@@ -20,7 +21,7 @@
     </aside>
 
     <!-- Main content -->
-    <main class="flex-1 bg-gray-100">
+    <main class="flex-1 bg-gray-100 overflow-x-hidden">
       <!-- Breadcrumb -->
       <div
         class="bg-white border-b border-gray-300 px-6 py-3 flex items-center space-x-3"
@@ -52,7 +53,7 @@
         </template>
       </div>
 
-      <div class="relative p-6 min-h-[calc(101vh-56px)]">
+      <div class="p-6 min-h-[calc(100vh-56px)]">
         <slot />
       </div>
     </main>
