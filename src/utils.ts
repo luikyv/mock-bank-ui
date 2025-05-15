@@ -109,6 +109,16 @@ export async function fetchMockAccounts(
   });
 }
 
+export async function deleteMockAccount(
+  accountId: string,
+  orgId: string
+): Promise<void> {
+  return await tryFetch(`/api/orgs/${orgId}/accounts/${accountId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+}
+
 export async function fetchAuthUrl(): Promise<string> {
   const res: { authUrl: string } = await tryFetch("/api/directory/auth-url");
   console.log(res);
