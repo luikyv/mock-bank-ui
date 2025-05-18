@@ -1,30 +1,45 @@
 import { useToast } from "vue-toastification";
-
-const toast = useToast();
+import { type Router } from "vue-router";
+import { useStore } from "./stores";
 
 export enum ErrorCode {
   USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
+  ACCOUNT_ALREADY_EXISTS = "ACCOUNT_ALREADY_EXISTS",
+  UNAUTHENTICATED = "UNAUTHENTICATED",
+  INTERNAL_ERROR = "INTERNAL_ERROR",
 }
 
-export function handleError(err: unknown) {
-  switch (true) {
-    case err instanceof ErrorInfo:
-      console.log(err.interactionId);
-      switch (err.code) {
-        case ErrorCode.USER_ALREADY_EXISTS:
-          toast.error(
-            `User already exists \nInteraction ID: ${err.interactionId}`
-          );
-          break;
-        default:
-          toast.error(`${err.message} \nInteraction ID: ${err.interactionId}`);
-          break;
-      }
-      break;
-    default:
+export function handleError(router: Router) {
+  const toast = useToast();
+  const store = useStore();
+
+  return (err: unknown) => {
+    if (!(err instanceof ErrorInfo)) {
       toast.error("Something went wrong :(");
       console.log(err);
-  }
+    }
+
+    const errInfo = err as ErrorInfo;
+    console.log(errInfo.interactionId);
+    switch (errInfo.code) {
+      case ErrorCode.UNAUTHENTICATED:
+        store.user = null;
+        toast.warning(`Seesion expired, please log in again`);
+        router.push("/login");
+        break;
+      case ErrorCode.USER_ALREADY_EXISTS:
+        toast.error(`User already exists`);
+        break;
+      case ErrorCode.ACCOUNT_ALREADY_EXISTS:
+        toast.error(`Account already exists`);
+        break;
+      default:
+        toast.error(
+          `${errInfo.message} \n\nInteraction ID: ${errInfo.interactionId}`
+        );
+        break;
+    }
+  };
 }
 
 export class ErrorInfo extends Error {

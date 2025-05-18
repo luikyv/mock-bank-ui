@@ -4,6 +4,7 @@ import OrganizationsView from "./views/OrganizationsView.vue";
 import UsersView from "./views/UsersView.vue";
 import ConsentsView from "./views/ConsentsView.vue";
 import AccountsView from "./views/AccountsView.vue";
+import LoginView from "./views/LoginView.vue";
 
 const routes: RouteRecordRaw[] = [
   { path: "/", name: "Default", component: OrganizationsView },
@@ -21,6 +22,7 @@ const routes: RouteRecordRaw[] = [
     name: "Accounts",
     component: AccountsView,
   },
+  { path: "/login", name: "Login", component: LoginView },
 ];
 
 export default createRouter({

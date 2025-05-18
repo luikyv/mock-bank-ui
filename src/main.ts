@@ -24,6 +24,6 @@ const options: PluginOptions = {
 };
 
 const app = createApp(App).use(router).use(pinia).use(Toast, options);
-app.config.errorHandler = handleError;
+app.config.errorHandler = handleError(router);
 
 app.mount("#app");

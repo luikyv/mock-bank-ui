@@ -54,16 +54,20 @@ export enum AccountSubtype {
 export interface Account {
   accountId: string;
   number: string;
-  checkDigit: string;
-  branchCode: string | null;
-  type: AccountType;
   subtype: AccountSubtype;
+  availableAmount: string;
+  blockedAmount: string;
+  automaticallyInvestedAmount: string;
+  checkDigit: string;
+  branchCode: string;
+  type: AccountType;
 }
 
 export interface AccountRequest {
   number: string;
-  checkDigit: string;
-  branchCode: string | null;
   type: AccountType;
   subtype: AccountSubtype;
+  availableAmount: string;
+  blockedAmount: string;
+  automaticallyInvestedAmount: string;
 }

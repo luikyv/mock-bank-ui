@@ -6,14 +6,30 @@ import type {
   Account,
   AccountRequest,
 } from "./types";
-import { ErrorInfo, type ResponseError } from "./errors";
+import { ErrorCode, ErrorInfo, type ResponseError } from "./errors";
 
 export async function tryFetch<T>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<T> {
   const res = await fetch(input, init);
-  const interactionId = res.headers.get("x-fapi-interaction-id") ?? undefined;
+  const interactionId = res.headers.get("x-interaction-id") ?? undefined;
+
+  if (res.status >= 500) {
+    throw new ErrorInfo(
+      ErrorCode.INTERNAL_ERROR,
+      ErrorCode.INTERNAL_ERROR,
+      interactionId
+    );
+  }
+
+  if (res.status == 401) {
+    throw new ErrorInfo(
+      ErrorCode.UNAUTHENTICATED,
+      ErrorCode.UNAUTHENTICATED,
+      interactionId
+    );
+  }
 
   const body = res.status != 204 ? await res.json() : {};
   if (!res.ok) {
@@ -111,18 +127,21 @@ export async function fetchMockAccounts(
 
 export async function deleteMockAccount(
   accountId: string,
+  userId: string,
   orgId: string
 ): Promise<void> {
-  return await tryFetch(`/api/orgs/${orgId}/accounts/${accountId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  return await tryFetch(
+    `/api/orgs/${orgId}/users/${userId}/accounts/${accountId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
 }
 
 export async function fetchAuthUrl(): Promise<string> {
-  const res: { authUrl: string } = await tryFetch("/api/directory/auth-url");
-  console.log(res);
-  return res.authUrl;
+  const res: { url: string } = await tryFetch("/api/directory/auth-url");
+  return res.url;
 }
 
 export async function fetchUser(): Promise<User> {

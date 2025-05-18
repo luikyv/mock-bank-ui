@@ -7,10 +7,11 @@
         @click="
           newAccount = {
             number: '',
-            checkDigit: '',
-            branchCode: '',
             type: AccountType.CHECKING,
             subtype: AccountSubtype.INDIVIDUAL,
+            availableAmount: '0.00',
+            blockedAmount: '0.00',
+            automaticallyInvestedAmount: '0.00',
           }
         "
       >
@@ -53,21 +54,30 @@
     <transition name="slide-left">
       <SidePanelComponent
         v-if="newAccount"
-        title="Criar Nova Conta"
+        title="Create New Account"
         @close="newAccount = null"
       >
         <form @submit.prevent="createAccount">
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Número</label
+                >Number</label
               >
               <input
                 v-model="newAccount.number"
                 type="text"
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500': newAccount.number && !isAccountNumberValid,
+                }"
                 required
               />
+              <p
+                v-if="newAccount.number && !isAccountNumberValid"
+                class="text-red-500 text-xs mt-1"
+              >
+                Number must contain between 8 and 10 numeric digits.
+              </p>
             </div>
 
             <div>
@@ -108,11 +118,81 @@
               </select>
             </div>
 
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Available Amount (R$)</label
+              >
+              <input
+                v-model="newAccount.availableAmount"
+                type="text"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500':
+                    newAccount.availableAmount && !isAvailableAmountValid,
+                }"
+                required
+              />
+              <p
+                v-if="newAccount.availableAmount && !isAvailableAmountValid"
+                class="text-red-500 text-xs mt-1"
+              >
+                Invalid amount format.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Automatically Invested Amount (R$)</label
+              >
+              <input
+                v-model="newAccount.automaticallyInvestedAmount"
+                type="text"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500':
+                    newAccount.automaticallyInvestedAmount &&
+                    !isAutomaticallyInvestedAmountValid,
+                }"
+                required
+              />
+              <p
+                v-if="
+                  newAccount.automaticallyInvestedAmount &&
+                  !isAutomaticallyInvestedAmountValid
+                "
+                class="text-red-500 text-xs mt-1"
+              >
+                Invalid amount format.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Blocked Amount (R$)</label
+              >
+              <input
+                v-model="newAccount.blockedAmount"
+                type="text"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500':
+                    newAccount.blockedAmount && !isBlockedAmountValid,
+                }"
+                required
+              />
+              <p
+                v-if="newAccount.blockedAmount && !isBlockedAmountValid"
+                class="text-red-500 text-xs mt-1"
+              >
+                Invalid amount format.
+              </p>
+            </div>
+
             <button
               type="submit"
               class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded"
             >
-              Criar
+              Create
             </button>
           </div>
         </form>
@@ -134,12 +214,12 @@
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Número</div>
+            <div class="text-gray-500 text-xs uppercase">Number</div>
             <div class="text-gray-800">{{ selectedAccount?.number }}</div>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Código da Agência</div>
+            <div class="text-gray-500 text-xs uppercase">Branch Code</div>
             <div class="text-gray-800">
               {{ selectedAccount?.branchCode || "-" }}
             </div>
@@ -165,14 +245,46 @@
               {{ selectedAccount?.subtype }}
             </div>
           </div>
+
+          <div>
+            <div class="text-gray-500 text-xs uppercase">Available Amount</div>
+            <div class="text-gray-800">
+              R$ {{ selectedAccount?.availableAmount }}
+            </div>
+          </div>
+
+          <div>
+            <div class="text-gray-500 text-xs uppercase">
+              Automatically Invested Amount
+            </div>
+            <div class="text-gray-800">
+              R$ {{ selectedAccount?.automaticallyInvestedAmount }}
+            </div>
+          </div>
+
+          <div>
+            <div class="text-gray-500 text-xs uppercase">Blocked Amount</div>
+            <div class="text-gray-800">
+              R$ {{ selectedAccount?.blockedAmount }}
+            </div>
+          </div>
         </div>
+
+        <template #panel-actions>
+          <button
+            @click="deleteAccount"
+            class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-4 rounded"
+          >
+            Delete
+          </button>
+        </template>
       </SidePanelComponent>
     </transition>
   </LayoutComponent>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
@@ -182,7 +294,11 @@ import {
   type Account,
   type AccountRequest,
 } from "../types";
-import { createMockAccount, fetchMockAccounts } from "../utils";
+import {
+  createMockAccount,
+  fetchMockAccounts,
+  deleteMockAccount,
+} from "../utils";
 import { useToast } from "vue-toastification";
 import TableComponent from "../components/TableComponent.vue";
 
@@ -191,7 +307,22 @@ const toast = useToast();
 
 const accounts = ref<Account[]>([]);
 const selectedAccount = ref<Account | null>(null);
+
 const newAccount = ref<AccountRequest | null>(null);
+const isAccountNumberValid = computed(() =>
+  /^\d{8,20}$/.test(newAccount.value?.number ?? "")
+);
+const isAvailableAmountValid = computed(() =>
+  /^-?\d{1,15}\.\d{2,4}$/.test(newAccount.value?.availableAmount ?? "")
+);
+const isAutomaticallyInvestedAmountValid = computed(() =>
+  /^-?\d{1,15}\.\d{2,4}$/.test(
+    newAccount.value?.automaticallyInvestedAmount ?? ""
+  )
+);
+const isBlockedAmountValid = computed(() =>
+  /^-?\d{1,15}\.\d{2,4}$/.test(newAccount.value?.blockedAmount ?? "")
+);
 
 const orgId = route.params.orgId as string;
 const userId = route.params.userId as string;
@@ -212,6 +343,15 @@ const createAccount = async () => {
   accounts.value = await fetchMockAccounts(userId, orgId);
   newAccount.value = null;
   toast.success("Account created successfully!");
+};
+
+const deleteAccount = async () => {
+  if (!selectedAccount.value) return;
+
+  await deleteMockAccount(selectedAccount.value.accountId, userId, orgId);
+  accounts.value = await fetchMockAccounts(userId, orgId);
+  selectedAccount.value = null;
+  toast.success("Account deleted successfully!");
 };
 
 onMounted(async () => {

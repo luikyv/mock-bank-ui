@@ -64,8 +64,17 @@
                 v-model="newUser.cpf"
                 type="text"
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500': newUser.cpf && !isNewUserCpfValid,
+                }"
                 required
               />
+              <p
+                v-if="newUser.cpf && !isNewUserCpfValid"
+                class="text-red-500 text-xs mt-1"
+              >
+                CPF must contain 11 numeric digits.
+              </p>
             </div>
 
             <button
@@ -93,6 +102,7 @@
                 {{ editedUser.id }}
               </div>
             </div>
+
             <div>
               <label class="text-gray-500 text-xs uppercase">Name</label>
               <input
@@ -101,6 +111,7 @@
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
               />
             </div>
+
             <div>
               <label class="text-gray-500 text-xs uppercase">Username</label>
               <input
@@ -109,13 +120,26 @@
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
               />
             </div>
+
             <div>
-              <label class="text-gray-500 text-xs uppercase">CPF</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >CPF</label
+              >
               <input
                 v-model="editedUser.cpf"
                 type="text"
-                class="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                :class="{
+                  'border-red-500': editedUser.cpf && !isEditUserCpfValid,
+                }"
+                required
               />
+              <p
+                v-if="editedUser.cpf && !isEditUserCpfValid"
+                class="text-red-500 text-xs mt-1"
+              >
+                CPF must contain 11 numeric digits.
+              </p>
             </div>
           </div>
         </div>
@@ -125,7 +149,7 @@
             <div class="flex gap-2">
               <button
                 @click="saveUser"
-                :disabled="!userWasEdited"
+                :disabled="!userWasEdited || !editedUserIsValid"
                 :class="[
                   'text-white text-sm font-medium py-2 px-4 rounded',
                   userWasEdited
@@ -180,8 +204,17 @@ const toast = useToast();
 const orgId = route.params.orgId as string;
 const users = ref<MockUser[]>([]);
 const newUser = ref<MockUserRequest | null>(null);
+const isNewUserCpfValid = computed(() =>
+  /^\d{11}$/.test(newUser.value?.cpf ?? "")
+);
 const selectedUser = ref<MockUser | null>(null);
 const editedUser = ref<MockUser | null>(null);
+const isEditUserCpfValid = computed(() =>
+  /^\d{11}$/.test(editedUser.value?.cpf ?? "")
+);
+const editedUserIsValid = computed(() => {
+  return isEditUserCpfValid.value;
+});
 
 const sidebarLinks = [{ label: "Users", path: `/orgs/${orgId}/users` }];
 

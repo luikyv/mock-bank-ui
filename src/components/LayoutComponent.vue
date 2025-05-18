@@ -64,7 +64,7 @@
 import { onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "../stores";
-import { fetchAuthUrl, fetchUser } from "../utils";
+import { fetchUser } from "../utils";
 
 defineProps<{
   links?: { label: string; path: string }[];
@@ -88,11 +88,7 @@ const clearMockUser = () => {
 
 onMounted(async () => {
   if (store.user == null) {
-    try {
-      store.user = await fetchUser();
-    } catch {
-      window.location.href = await fetchAuthUrl();
-    }
+    store.user = await fetchUser();
   }
 });
 </script>

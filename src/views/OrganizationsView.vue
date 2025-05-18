@@ -4,11 +4,11 @@
 
     <div v-if="Object.keys(user?.organizations || {}).length" class="space-y-4">
       <RowComponent
-        v-for="(org, orgId) in user?.organizations"
-        :key="orgId"
+        v-for="org in user?.organizations"
+        :key="org.id"
         :title="org.name"
         :onClick="goToOrganization(org)"
-        :tags="[{ key: 'ID', value: orgId }]"
+        :tags="[{ key: 'ID', value: org.id }]"
       ></RowComponent>
     </div>
 
