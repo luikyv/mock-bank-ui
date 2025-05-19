@@ -116,6 +116,23 @@ export async function createMockAccount(
   return;
 }
 
+export async function updateMockAccount(
+  accountId: string,
+  userId: string,
+  orgId: string,
+  account: AccountRequest
+): Promise<void> {
+  await tryFetch(`/api/orgs/${orgId}/users/${userId}/accounts/${accountId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ data: account }),
+    credentials: "include",
+  });
+  return;
+}
+
 export async function fetchMockAccounts(
   userId: string,
   orgId: string

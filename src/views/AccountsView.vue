@@ -57,7 +57,23 @@
         title="Create New Account"
         @close="newAccount = null"
       >
-        <form @submit.prevent="createAccount">
+        <template #panel-actions>
+          <button
+            type="submit"
+            form="create-account-form"
+            :disabled="!newAccountIsValid"
+            :class="[
+              'text-white text-sm font-medium py-2 px-4 rounded',
+              newAccountIsValid
+                ? 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-gray-300 cursor-not-allowed',
+            ]"
+          >
+            Create
+          </button>
+        </template>
+
+        <form id="create-account-form" @submit.prevent="createAccount">
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -68,12 +84,13 @@
                 type="text"
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                 :class="{
-                  'border-red-500': newAccount.number && !isAccountNumberValid,
+                  'border-red-500':
+                    newAccount.number && !newAccountNumberIsValid,
                 }"
                 required
               />
               <p
-                v-if="newAccount.number && !isAccountNumberValid"
+                v-if="newAccount.number && !newAccountNumberIsValid"
                 class="text-red-500 text-xs mt-1"
               >
                 Number must contain between 8 and 10 numeric digits.
@@ -128,12 +145,16 @@
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                 :class="{
                   'border-red-500':
-                    newAccount.availableAmount && !isAvailableAmountValid,
+                    newAccount.availableAmount &&
+                    !newAccountAvailableAmountIsValid,
                 }"
                 required
               />
               <p
-                v-if="newAccount.availableAmount && !isAvailableAmountValid"
+                v-if="
+                  newAccount.availableAmount &&
+                  !newAccountAvailableAmountIsValid
+                "
                 class="text-red-500 text-xs mt-1"
               >
                 Invalid amount format.
@@ -151,14 +172,14 @@
                 :class="{
                   'border-red-500':
                     newAccount.automaticallyInvestedAmount &&
-                    !isAutomaticallyInvestedAmountValid,
+                    !newAccountAutomaticallyInvestedAmountIsValid,
                 }"
                 required
               />
               <p
                 v-if="
                   newAccount.automaticallyInvestedAmount &&
-                  !isAutomaticallyInvestedAmountValid
+                  !newAccountAutomaticallyInvestedAmountIsValid
                 "
                 class="text-red-500 text-xs mt-1"
               >
@@ -176,24 +197,19 @@
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                 :class="{
                   'border-red-500':
-                    newAccount.blockedAmount && !isBlockedAmountValid,
+                    newAccount.blockedAmount && !newAccountBlockedAmountIsValid,
                 }"
                 required
               />
               <p
-                v-if="newAccount.blockedAmount && !isBlockedAmountValid"
+                v-if="
+                  newAccount.blockedAmount && !newAccountBlockedAmountIsValid
+                "
                 class="text-red-500 text-xs mt-1"
               >
                 Invalid amount format.
               </p>
             </div>
-
-            <button
-              type="submit"
-              class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded"
-            >
-              Create
-            </button>
           </div>
         </form>
       </SidePanelComponent>
@@ -209,74 +225,176 @@
           <div>
             <div class="text-gray-500 text-xs uppercase">ID</div>
             <div class="font-mono text-sm text-gray-800">
-              {{ selectedAccount?.accountId }}
+              {{ selectedAccount.accountId }}
             </div>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Number</div>
-            <div class="text-gray-800">{{ selectedAccount?.number }}</div>
+            <label class="text-gray-500 text-xs uppercase">Number</label>
+            <input
+              v-model="selectedAccount.number"
+              type="text"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              :class="{
+                'border-red-500':
+                  selectedAccount.number && !selectedAccountNumberIsValid,
+              }"
+              required
+            />
+            <p
+              v-if="selectedAccount.number && !selectedAccountNumberIsValid"
+              class="text-red-500 text-xs mt-1"
+            >
+              Number must contain between 8 and 10 numeric digits.
+            </p>
           </div>
 
           <div>
             <div class="text-gray-500 text-xs uppercase">Branch Code</div>
             <div class="text-gray-800">
-              {{ selectedAccount?.branchCode || "-" }}
+              {{ selectedAccount.branchCode || "-" }}
             </div>
           </div>
 
           <div>
             <div class="text-gray-500 text-xs uppercase">Check Digit</div>
-            <div class="text-gray-800">
-              {{ selectedAccount?.checkDigit }}
-            </div>
+            <div class="text-gray-800">{{ selectedAccount.checkDigit }}</div>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Type</div>
-            <div class="text-gray-800">
-              {{ selectedAccount?.type }}
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Type</label
+            >
+            <select
+              v-model="selectedAccount.type"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              required
+            >
+              <option v-for="value in AccountType" :key="value" :value="value">
+                {{ value }}
+              </option>
+            </select>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Subtype</div>
-            <div class="text-gray-800">
-              {{ selectedAccount?.subtype }}
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Subtype</label
+            >
+            <select
+              v-model="selectedAccount.subtype"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              required
+            >
+              <option
+                v-for="value in AccountSubtype"
+                :key="value"
+                :value="value"
+              >
+                {{ value }}
+              </option>
+            </select>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Available Amount</div>
-            <div class="text-gray-800">
-              R$ {{ selectedAccount?.availableAmount }}
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Available Amount (R$)</label
+            >
+            <input
+              v-model="selectedAccount.availableAmount"
+              type="text"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              :class="{
+                'border-red-500':
+                  selectedAccount.availableAmount &&
+                  !selectedAccountAvailableAmountIsValid,
+              }"
+              required
+            />
+            <p
+              v-if="
+                selectedAccount.availableAmount &&
+                !selectedAccountAvailableAmountIsValid
+              "
+              class="text-red-500 text-xs mt-1"
+            >
+              Invalid amount format.
+            </p>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">
-              Automatically Invested Amount
-            </div>
-            <div class="text-gray-800">
-              R$ {{ selectedAccount?.automaticallyInvestedAmount }}
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Automatically Invested Amount (R$)</label
+            >
+            <input
+              v-model="selectedAccount.automaticallyInvestedAmount"
+              type="text"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              :class="{
+                'border-red-500':
+                  selectedAccount.automaticallyInvestedAmount &&
+                  !selectedAccountAutomaticallyInvestedAmountIsValid,
+              }"
+              required
+            />
+            <p
+              v-if="
+                selectedAccount.automaticallyInvestedAmount &&
+                !selectedAccountAutomaticallyInvestedAmountIsValid
+              "
+              class="text-red-500 text-xs mt-1"
+            >
+              Invalid amount format.
+            </p>
           </div>
 
           <div>
-            <div class="text-gray-500 text-xs uppercase">Blocked Amount</div>
-            <div class="text-gray-800">
-              R$ {{ selectedAccount?.blockedAmount }}
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Blocked Amount (R$)</label
+            >
+            <input
+              v-model="selectedAccount.blockedAmount"
+              type="text"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              :class="{
+                'border-red-500':
+                  selectedAccount.blockedAmount &&
+                  !selectedAccountBlockedAmountIsValid,
+              }"
+              required
+            />
+            <p
+              v-if="
+                selectedAccount.blockedAmount &&
+                !selectedAccountBlockedAmountIsValid
+              "
+              class="text-red-500 text-xs mt-1"
+            >
+              Invalid amount format.
+            </p>
           </div>
         </div>
 
         <template #panel-actions>
-          <button
-            @click="deleteAccount"
-            class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-4 rounded"
-          >
-            Delete
-          </button>
+          <div class="flex justify-between items-center w-full">
+            <button
+              @click="saveAccount"
+              :disabled="!accountWasEdited || !selectedAccountIsValid"
+              :class="[
+                'text-white text-sm font-medium py-2 px-4 rounded',
+                accountWasEdited && selectedAccountIsValid
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-300 cursor-not-allowed',
+              ]"
+            >
+              Save
+            </button>
+            <button
+              @click="deleteAccount"
+              class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-4 rounded"
+            >
+              Delete
+            </button>
+          </div>
         </template>
       </SidePanelComponent>
     </transition>
@@ -284,10 +402,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
+import TableComponent from "../components/TableComponent.vue";
+import { useToast } from "vue-toastification";
 import {
   AccountSubtype,
   AccountType,
@@ -298,31 +418,11 @@ import {
   createMockAccount,
   fetchMockAccounts,
   deleteMockAccount,
+  updateMockAccount,
 } from "../utils";
-import { useToast } from "vue-toastification";
-import TableComponent from "../components/TableComponent.vue";
 
 const route = useRoute();
 const toast = useToast();
-
-const accounts = ref<Account[]>([]);
-const selectedAccount = ref<Account | null>(null);
-
-const newAccount = ref<AccountRequest | null>(null);
-const isAccountNumberValid = computed(() =>
-  /^\d{8,20}$/.test(newAccount.value?.number ?? "")
-);
-const isAvailableAmountValid = computed(() =>
-  /^-?\d{1,15}\.\d{2,4}$/.test(newAccount.value?.availableAmount ?? "")
-);
-const isAutomaticallyInvestedAmountValid = computed(() =>
-  /^-?\d{1,15}\.\d{2,4}$/.test(
-    newAccount.value?.automaticallyInvestedAmount ?? ""
-  )
-);
-const isBlockedAmountValid = computed(() =>
-  /^-?\d{1,15}\.\d{2,4}$/.test(newAccount.value?.blockedAmount ?? "")
-);
 
 const orgId = route.params.orgId as string;
 const userId = route.params.userId as string;
@@ -332,17 +432,111 @@ const sidebarLinks = [
   { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 
+const accounts = ref<Account[]>([]);
+const selectedAccount = ref<Account | null>(null);
+const originalAccount = ref<Account | null>(null);
+
+watch(
+  () => selectedAccount.value,
+  (account) => {
+    originalAccount.value = account ? { ...account } : null;
+  },
+  { immediate: true }
+);
+
+const selectedAccountNumberIsValid = computed(() =>
+  isNumberValid(selectedAccount.value?.number ?? "")
+);
+const selectedAccountAvailableAmountIsValid = computed(() =>
+  isAmountValid(selectedAccount.value?.availableAmount ?? "")
+);
+const selectedAccountAutomaticallyInvestedAmountIsValid = computed(() =>
+  isAmountValid(selectedAccount.value?.automaticallyInvestedAmount ?? "")
+);
+const selectedAccountBlockedAmountIsValid = computed(() =>
+  isAmountValid(selectedAccount.value?.blockedAmount ?? "")
+);
+
+const selectedAccountIsValid = computed(() => {
+  return (
+    selectedAccountNumberIsValid.value &&
+    selectedAccountAvailableAmountIsValid.value &&
+    selectedAccountAutomaticallyInvestedAmountIsValid.value &&
+    selectedAccountBlockedAmountIsValid.value
+  );
+});
+
+const accountWasEdited = computed(() => {
+  if (!selectedAccount.value || !originalAccount.value) return false;
+  return (
+    selectedAccount.value.number !== originalAccount.value.number ||
+    selectedAccount.value.availableAmount !==
+      originalAccount.value.availableAmount ||
+    selectedAccount.value.automaticallyInvestedAmount !==
+      originalAccount.value.automaticallyInvestedAmount ||
+    selectedAccount.value.blockedAmount !== originalAccount.value.blockedAmount
+  );
+});
+
+const newAccount = ref<AccountRequest | null>(null);
+
+const newAccountNumberIsValid = computed(() =>
+  isNumberValid(newAccount.value?.number ?? "")
+);
+const newAccountAvailableAmountIsValid = computed(() =>
+  isAmountValid(newAccount.value?.availableAmount ?? "")
+);
+const newAccountAutomaticallyInvestedAmountIsValid = computed(() =>
+  isAmountValid(newAccount.value?.automaticallyInvestedAmount ?? "")
+);
+const newAccountBlockedAmountIsValid = computed(() =>
+  isAmountValid(newAccount.value?.blockedAmount ?? "")
+);
+
+const newAccountIsValid = computed(() => {
+  return (
+    newAccountNumberIsValid.value &&
+    newAccountAvailableAmountIsValid.value &&
+    newAccountAutomaticallyInvestedAmountIsValid.value &&
+    newAccountBlockedAmountIsValid.value
+  );
+});
+
 const selectAccount = (account: Account) => {
-  selectedAccount.value = account;
+  selectedAccount.value = { ...account };
 };
 
 const createAccount = async () => {
   if (!newAccount.value) return;
 
+  if (!newAccountIsValid.value) {
+    toast.warning("Invalid input, form not submitted");
+    return;
+  }
+
   await createMockAccount(newAccount.value, userId, orgId);
   accounts.value = await fetchMockAccounts(userId, orgId);
   newAccount.value = null;
   toast.success("Account created successfully!");
+};
+
+const saveAccount = async () => {
+  if (!selectedAccount.value) return;
+
+  if (!selectedAccountIsValid.value) {
+    toast.warning("Invalid input, form not submitted");
+    return;
+  }
+
+  await updateMockAccount(
+    selectedAccount.value.accountId,
+    userId,
+    orgId,
+    selectedAccount.value
+  );
+  accounts.value = await fetchMockAccounts(userId, orgId);
+  selectedAccount.value = null;
+  toast.success("Account updated successfully!");
 };
 
 const deleteAccount = async () => {
@@ -352,6 +546,14 @@ const deleteAccount = async () => {
   accounts.value = await fetchMockAccounts(userId, orgId);
   selectedAccount.value = null;
   toast.success("Account deleted successfully!");
+};
+
+const isNumberValid = (number: string): boolean => {
+  return /^\d{8,10}$/.test(number);
+};
+
+const isAmountValid = (amount: string): boolean => {
+  return /^-?\d{1,15}\.\d{2,4}$/.test(amount);
 };
 
 onMounted(async () => {

@@ -7,7 +7,7 @@
         v-for="org in user?.organizations"
         :key="org.id"
         :title="org.name"
-        :onClick="goToOrganization(org)"
+        :onClick="() => goToOrganization(org)"
         :tags="[{ key: 'ID', value: org.id }]"
       ></RowComponent>
     </div>
@@ -29,10 +29,8 @@ const store = useStore();
 const user = computed(() => store.user);
 
 const goToOrganization = (org: Organization) => {
-  return async () => {
-    store.org = org;
-    router.push(`/orgs/${org.id}`);
-  };
+  store.org = org;
+  router.push(`/orgs/${org.id}`);
 };
 
 onMounted(() => {

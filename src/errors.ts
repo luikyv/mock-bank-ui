@@ -17,6 +17,7 @@ export function handleError(router: Router) {
     if (!(err instanceof ErrorInfo)) {
       toast.error("Something went wrong :(");
       console.log(err);
+      return;
     }
 
     const errInfo = err as ErrorInfo;

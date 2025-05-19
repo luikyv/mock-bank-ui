@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute right-0 top-0 bottom-0 bg-white shadow-xl border-l border-gray-200 z-50 overflow-y-auto"
+    class="fixed top-0 right-0 h-screen bg-white shadow-xl border-l border-gray-200 z-50"
     :style="{ width: panelWidth + 'px' }"
   >
     <!-- Resize handle -->
@@ -21,14 +21,12 @@
       </button>
     </div>
 
-    <!-- Content + Actions Wrapper -->
     <div class="flex flex-col h-[calc(100%-64px)] overflow-hidden">
       <!-- Scrollable content -->
       <div class="flex-1 overflow-y-auto px-4 py-4 text-sm">
         <slot />
       </div>
 
-      <!-- Bottom actions -->
       <div class="bg-gray-100 border-t border-gray-300 px-4 py-2">
         <slot name="panel-actions" />
       </div>
