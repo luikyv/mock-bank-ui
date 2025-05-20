@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from "vue-router";
 import OrganizationsView from "./views/OrganizationsView.vue";
 import UsersView from "./views/UsersView.vue";
 import ConsentsView from "./views/ConsentsView.vue";
+import ResourcesView from "./views/ResourcesView.vue";
 import AccountsView from "./views/AccountsView.vue";
 import LoginView from "./views/LoginView.vue";
 
@@ -16,6 +17,11 @@ const routes: RouteRecordRaw[] = [
     path: "/orgs/:orgId/users/:userId/consents",
     name: "ConsentsView",
     component: ConsentsView,
+  },
+  {
+    path: "/orgs/:orgId/users/:userId/resources",
+    name: "ConsentResourcesViewsView",
+    component: ResourcesView,
   },
   {
     path: "/orgs/:orgId/users/:userId/accounts",

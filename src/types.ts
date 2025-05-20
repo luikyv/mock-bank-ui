@@ -71,3 +71,18 @@ export interface AccountRequest {
   blockedAmount: string;
   automaticallyInvestedAmount: string;
 }
+
+export enum ResourceStatus {
+  AVAILABLE = "AVAILABLE",
+  UNAVAILABLE = "UNAVAILABLE",
+  TEMPORARILY_UNAVAILABLE = "TEMPORARILY_UNAVAILABLE",
+  PENDING_AUTHORISATION = "PENDING_AUTHORISATION",
+}
+
+export interface Resource {
+  consentId: string;
+  resourceId: string;
+  status: ResourceStatus;
+  type: string;
+  creationDateTime: string;
+}

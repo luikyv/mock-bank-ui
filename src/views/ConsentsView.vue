@@ -7,7 +7,7 @@
         <th class="px-4 py-3">ID</th>
         <th class="px-4 py-3">Status</th>
         <th class="px-4 py-3">Created At</th>
-        <th class="px-4 py-3">Expiration</th>
+        <th class="px-4 py-3">Expires At</th>
         <th class="px-4 py-3">Client ID</th>
       </template>
 
@@ -122,6 +122,10 @@ const userId = route.params.userId as string;
 
 const sidebarLinks = [
   { label: "Consents", path: `/orgs/${orgId}/users/${userId}/consents` },
+  {
+    label: "Resources",
+    path: `/orgs/${orgId}/users/${userId}/resources`,
+  },
   { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 

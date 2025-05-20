@@ -429,6 +429,10 @@ const userId = route.params.userId as string;
 
 const sidebarLinks = [
   { label: "Consents", path: `/orgs/${orgId}/users/${userId}/consents` },
+  {
+    label: "Resources",
+    path: `/orgs/${orgId}/users/${userId}/resources`,
+  },
   { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 

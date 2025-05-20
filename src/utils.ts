@@ -5,6 +5,7 @@ import type {
   MockUserRequest,
   Account,
   AccountRequest,
+  Resource,
 } from "./types";
 import { ErrorCode, ErrorInfo, type ResponseError } from "./errors";
 
@@ -165,4 +166,31 @@ export async function fetchUser(): Promise<User> {
   return await tryFetch(`/api/me`, {
     credentials: "include",
   });
+}
+
+export async function fetchMockResources(
+  userId: string,
+  orgId: string
+): Promise<Resource[]> {
+  return await tryFetch(`/api/orgs/${orgId}/users/${userId}/resources`, {
+    credentials: "include",
+  });
+}
+
+export async function updateMockResource(
+  userId: string,
+  orgId: string,
+  resource: Resource
+): Promise<void> {
+  return await tryFetch(
+    `/api/orgs/${orgId}/users/${userId}/resources/${resource.resourceId}/consents/${resource.consentId}?type=${resource.type}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: { status: resource.status } }),
+      credentials: "include",
+    }
+  );
 }
