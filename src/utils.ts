@@ -8,13 +8,21 @@ import type {
   Resource,
 } from "./types";
 import { ErrorCode, ErrorInfo, type ResponseError } from "./errors";
+import { v4 as uuidv4 } from "uuid";
 
 export async function tryFetch<T>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<T> {
+  const interactionId = uuidv4();
+  init = init ?? {};
+  init.headers = {
+    ...(init.headers instanceof Headers
+      ? Object.fromEntries(init.headers.entries())
+      : init.headers),
+    "x-fapi-interaction-id": interactionId,
+  };
   const res = await fetch(input, init);
-  const interactionId = res.headers.get("x-interaction-id") ?? undefined;
 
   if (res.status >= 500) {
     throw new ErrorInfo(
