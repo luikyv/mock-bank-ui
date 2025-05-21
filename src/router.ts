@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
   { path: "/orgs", name: "Organizations", component: OrganizationsView },
   { path: "/orgs/:orgId", name: "Organization", component: UsersView },
   { path: "/orgs/:orgId/users", name: "Users", component: UsersView },
-  { path: "/orgs/:orgId/users/:userId", name: "User", component: ConsentsView },
+  { path: "/orgs/:orgId/users/:userId", name: "User", component: AccountsView },
   {
     path: "/orgs/:orgId/users/:userId/consents",
     name: "ConsentsView",

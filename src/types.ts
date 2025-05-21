@@ -1,3 +1,9 @@
+export interface Links {
+  self?: string;
+  next?: string;
+  prev?: string;
+}
+
 export interface Organization {
   id: string;
   name: string;
@@ -22,6 +28,11 @@ export interface MockUser {
   cpf: string;
 }
 
+export interface MockUsers {
+  data: MockUser[];
+  links: Links;
+}
+
 export enum ConsentStatus {
   AUTHORIZED = "AUTHORISED",
   AWAITING_AUTHORIZATION = "AWAITING_AUTHORISATION",
@@ -37,6 +48,11 @@ export interface Consent {
   statusUpdateDateTime: string;
   clientId: string;
   userId: string;
+}
+
+export interface Consents {
+  data: Consent[];
+  links: Links;
 }
 
 export enum AccountType {
@@ -63,6 +79,11 @@ export interface Account {
   type: AccountType;
 }
 
+export interface Accounts {
+  data: Account[];
+  links: Links;
+}
+
 export interface AccountRequest {
   number: string;
   type: AccountType;
@@ -85,4 +106,9 @@ export interface Resource {
   status: ResourceStatus;
   type: string;
   creationDateTime: string;
+}
+
+export interface Resources {
+  data: Resource[];
+  links: Links;
 }

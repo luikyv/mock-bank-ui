@@ -1,6 +1,5 @@
 import { useToast } from "vue-toastification";
 import { type Router } from "vue-router";
-import { useStore } from "./stores";
 
 export enum ErrorCode {
   USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
@@ -11,7 +10,6 @@ export enum ErrorCode {
 
 export function handleError(router: Router) {
   const toast = useToast();
-  const store = useStore();
 
   return (err: unknown) => {
     if (!(err instanceof ErrorInfo)) {
@@ -24,7 +22,6 @@ export function handleError(router: Router) {
     console.log(errInfo.interactionId);
     switch (errInfo.code) {
       case ErrorCode.UNAUTHENTICATED:
-        store.user = null;
         toast.info(`Please log in again`);
         router.push("/login");
         break;

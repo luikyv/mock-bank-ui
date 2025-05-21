@@ -1,7 +1,20 @@
 <template>
   <LayoutComponent :links="sidebarLinks">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Users</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-semibold">Users</h1>
+        <button
+          @click="reloadUsers(undefined, true)"
+          class="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
+          :disabled="isReloading"
+          title="Reload users"
+        >
+          <ArrowPathIcon
+            class="h-5 w-5"
+            :class="{ 'animate-spin': isReloading }"
+          />
+        </button>
+      </div>
       <button
         class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded"
         @click="newUser = { username: '', cpf: '', name: '' }"
@@ -20,6 +33,14 @@
       ></RowComponent>
     </div>
     <div v-else class="text-gray-500">No users found.</div>
+
+    <PaginationComponent
+      :hasPrev="!!paginationLinks.prev"
+      :hasNext="!!paginationLinks.next"
+      :show="users.length > 0"
+      @prev="reloadUsers(paginationLinks.prev)"
+      @next="reloadUsers(paginationLinks.next)"
+    />
 
     <transition name="slide-left">
       <SidePanelComponent
@@ -185,8 +206,9 @@ import { useRoute, useRouter } from "vue-router";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import RowComponent from "../components/RowComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
+import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 import { useToast } from "vue-toastification";
-import type { MockUser, MockUserRequest } from "../types";
+import type { Links, MockUser, MockUserRequest } from "../types";
 import {
   fetchMockUsers,
   createMockUser,
@@ -194,6 +216,7 @@ import {
   deleteMockUser,
 } from "../utils";
 import { useStore } from "../stores";
+import PaginationComponent from "../components/PaginationComponent.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -201,11 +224,14 @@ const toast = useToast();
 const store = useStore();
 
 const orgId = route.params.orgId as string;
+const sidebarLinks = [{ label: "Users", path: `/orgs/${orgId}/users` }];
+const isReloading = ref(false);
 
 const users = ref<MockUser[]>([]);
 const newUser = ref<MockUserRequest | null>(null);
 const selectedUser = ref<MockUser | null>(null);
 const originalUser = ref<MockUser | null>(null);
+const paginationLinks = ref<Links>({});
 
 const newUserCpfIsValid = computed(() =>
   /^\d{11}$/.test(newUser.value?.cpf ?? "")
@@ -230,8 +256,6 @@ const userWasEdited = computed(() => {
   );
 });
 
-const sidebarLinks = [{ label: "Users", path: `/orgs/${orgId}/users` }];
-
 const selectUser = (user: MockUser) => {
   selectedUser.value = { ...user };
   originalUser.value = { ...user };
@@ -240,7 +264,7 @@ const selectUser = (user: MockUser) => {
 const createUser = async () => {
   if (!newUser.value || !newUserIsValid.value) return;
   await createMockUser(newUser.value, orgId);
-  users.value = await fetchMockUsers(orgId);
+  reloadUsers();
   newUser.value = null;
   toast.success("User created successfully!");
 };
@@ -248,14 +272,14 @@ const createUser = async () => {
 const saveUser = async () => {
   if (!selectedUser.value || !selectedUserIsValid.value) return;
   await updateMockUser(selectedUser.value.id, selectedUser.value, orgId);
-  users.value = await fetchMockUsers(orgId);
+  reloadUsers();
   selectedUser.value = null;
   toast.success("User updated successfully!");
 };
 
 const deleteUser = async (user: MockUser) => {
   await deleteMockUser(user.id, orgId);
-  users.value = await fetchMockUsers(orgId);
+  await reloadUsers();
   if (selectedUser.value?.id === user.id) selectedUser.value = null;
   toast.success("User deleted successfully!");
 };
@@ -265,7 +289,20 @@ const goToUserResources = (user: MockUser) => {
   router.push(`/orgs/${orgId}/users/${user.id}`);
 };
 
+const reloadUsers = async (url?: string, notify?: boolean) => {
+  url = paginationLinks.value.self ?? url;
+  isReloading.value = true;
+  try {
+    const { data, links } = await fetchMockUsers(orgId, url);
+    users.value = data;
+    paginationLinks.value = links;
+    if (notify) toast.info("Users reloaded");
+  } finally {
+    isReloading.value = false;
+  }
+};
+
 onMounted(async () => {
-  users.value = await fetchMockUsers(orgId);
+  await reloadUsers();
 });
 </script>

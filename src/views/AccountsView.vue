@@ -1,7 +1,20 @@
 <template>
   <LayoutComponent :links="sidebarLinks">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Accounts</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-semibold">Accounts</h1>
+        <button
+          @click="reloadAccounts(undefined, true)"
+          class="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
+          :disabled="isReloading"
+          title="Reload users"
+        >
+          <ArrowPathIcon
+            class="h-5 w-5"
+            :class="{ 'animate-spin': isReloading }"
+          />
+        </button>
+      </div>
       <button
         class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded"
         @click="
@@ -50,6 +63,13 @@
     <div v-else class="flex-1 flex items-center justify-center">
       <p class="text-gray-500">No accounts found.</p>
     </div>
+    <PaginationComponent
+      :hasPrev="!!paginationLinks.prev"
+      :hasNext="!!paginationLinks.next"
+      :show="accounts.length > 0"
+      @prev="reloadAccounts(paginationLinks.prev)"
+      @next="reloadAccounts(paginationLinks.next)"
+    />
 
     <transition name="slide-left">
       <SidePanelComponent
@@ -404,6 +424,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
+import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
 import TableComponent from "../components/TableComponent.vue";
@@ -413,6 +434,7 @@ import {
   AccountType,
   type Account,
   type AccountRequest,
+  type Links,
 } from "../types";
 import {
   createMockAccount,
@@ -420,25 +442,27 @@ import {
   deleteMockAccount,
   updateMockAccount,
 } from "../utils";
+import PaginationComponent from "../components/PaginationComponent.vue";
 
 const route = useRoute();
 const toast = useToast();
 
 const orgId = route.params.orgId as string;
 const userId = route.params.userId as string;
-
+const isReloading = ref(false);
 const sidebarLinks = [
+  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
   { label: "Consents", path: `/orgs/${orgId}/users/${userId}/consents` },
   {
     label: "Resources",
     path: `/orgs/${orgId}/users/${userId}/resources`,
   },
-  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 
 const accounts = ref<Account[]>([]);
 const selectedAccount = ref<Account | null>(null);
 const originalAccount = ref<Account | null>(null);
+const paginationLinks = ref<Links>({});
 
 watch(
   () => selectedAccount.value,
@@ -519,7 +543,7 @@ const createAccount = async () => {
   }
 
   await createMockAccount(newAccount.value, userId, orgId);
-  accounts.value = await fetchMockAccounts(userId, orgId);
+  await reloadAccounts();
   newAccount.value = null;
   toast.success("Account created successfully!");
 };
@@ -538,7 +562,7 @@ const saveAccount = async () => {
     orgId,
     selectedAccount.value
   );
-  accounts.value = await fetchMockAccounts(userId, orgId);
+  await reloadAccounts();
   selectedAccount.value = null;
   toast.success("Account updated successfully!");
 };
@@ -547,7 +571,7 @@ const deleteAccount = async () => {
   if (!selectedAccount.value) return;
 
   await deleteMockAccount(selectedAccount.value.accountId, userId, orgId);
-  accounts.value = await fetchMockAccounts(userId, orgId);
+  await reloadAccounts();
   selectedAccount.value = null;
   toast.success("Account deleted successfully!");
 };
@@ -560,7 +584,18 @@ const isAmountValid = (amount: string): boolean => {
   return /^-?\d{1,15}\.\d{2,4}$/.test(amount);
 };
 
-onMounted(async () => {
-  accounts.value = await fetchMockAccounts(userId, orgId);
-});
+const reloadAccounts = async (url?: string, notify?: boolean) => {
+  url = paginationLinks.value.self ?? url;
+  isReloading.value = true;
+  try {
+    const { data, links } = await fetchMockAccounts(userId, orgId, url);
+    accounts.value = data;
+    paginationLinks.value = links;
+    if (notify) toast.info("Accounts reloaded");
+  } finally {
+    isReloading.value = false;
+  }
+};
+
+onMounted(reloadAccounts);
 </script>

@@ -61,10 +61,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount } from "vue";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "../stores";
-import { fetchUser } from "../utils";
 
 defineProps<{
   links?: { label: string; path: string }[];
@@ -85,10 +84,4 @@ const clearMockUser = () => {
   store.mockUser = null;
   router.push(`/orgs/${org.value?.id}/users`);
 };
-
-onBeforeMount(async () => {
-  if (store.user == null) {
-    store.user = await fetchUser();
-  }
-});
 </script>

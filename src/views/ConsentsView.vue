@@ -1,6 +1,19 @@
 <template>
   <LayoutComponent :links="sidebarLinks">
-    <h1 class="text-2xl font-semibold mb-6">Consents</h1>
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-semibold">Consents</h1>
+      <button
+        @click="reloadConsents(undefined, true)"
+        class="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
+        :disabled="isReloading"
+        title="Reload users"
+      >
+        <ArrowPathIcon
+          class="h-5 w-5"
+          :class="{ 'animate-spin': isReloading }"
+        />
+      </button>
+    </div>
 
     <TableComponent v-if="consents.length">
       <template #header>
@@ -33,6 +46,13 @@
     <div v-else class="flex-1 flex items-center justify-center">
       <p class="text-gray-500">No consents found.</p>
     </div>
+    <PaginationComponent
+      :hasPrev="!!paginationLinks.prev"
+      :hasNext="!!paginationLinks.next"
+      :show="consents.length > 0"
+      @prev="reloadConsents(paginationLinks.prev)"
+      @next="reloadConsents(paginationLinks.next)"
+    />
 
     <transition name="slide-left">
       <SidePanelComponent
@@ -107,33 +127,49 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useToast } from "vue-toastification";
+import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
 import TableComponent from "../components/TableComponent.vue";
-import type { Consent } from "../types";
+import type { Consent, Links } from "../types";
 import { fetchConsents } from "../utils";
+import PaginationComponent from "../components/PaginationComponent.vue";
 
 const route = useRoute();
+const toast = useToast();
 const consents = ref<Consent[]>([]);
 const selectedConsent = ref<Consent | null>(null);
+const paginationLinks = ref<Links>({});
 
 const orgId = route.params.orgId as string;
 const userId = route.params.userId as string;
-
+const isReloading = ref(false);
 const sidebarLinks = [
+  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
   { label: "Consents", path: `/orgs/${orgId}/users/${userId}/consents` },
   {
     label: "Resources",
     path: `/orgs/${orgId}/users/${userId}/resources`,
   },
-  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 
 const selectConsent = (consent: Consent) => {
   selectedConsent.value = consent;
 };
 
-onMounted(async () => {
-  consents.value = await fetchConsents(userId, orgId);
-});
+const reloadConsents = async (url?: string, notify?: boolean) => {
+  url = paginationLinks.value.self ?? url;
+  isReloading.value = true;
+  try {
+    const { data, links } = await fetchConsents(userId, orgId, url);
+    consents.value = data;
+    paginationLinks.value = links;
+    if (notify) toast.info("Consents reloaded");
+  } finally {
+    isReloading.value = false;
+  }
+};
+
+onMounted(reloadConsents);
 </script>

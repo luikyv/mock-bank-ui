@@ -1,11 +1,12 @@
 import type {
-  MockUser,
-  Consent,
   User,
   MockUserRequest,
-  Account,
   AccountRequest,
   Resource,
+  MockUsers,
+  Consents,
+  Accounts,
+  Resources,
 } from "./types";
 import { ErrorCode, ErrorInfo, type ResponseError } from "./errors";
 import { v4 as uuidv4 } from "uuid";
@@ -50,11 +51,14 @@ export async function tryFetch<T>(
     );
   }
 
-  return body.data as T;
+  return body as T;
 }
 
-export async function fetchMockUsers(orgId: string): Promise<MockUser[]> {
-  return await tryFetch(`/api/orgs/${orgId}/users`, {
+export async function fetchMockUsers(
+  orgId: string,
+  pageUrl?: string
+): Promise<MockUsers> {
+  return await tryFetch(pageUrl ?? `/api/orgs/${orgId}/users?page=1&size=10`, {
     credentials: "include",
   });
 }
@@ -102,11 +106,15 @@ export async function deleteMockUser(
 
 export async function fetchConsents(
   userId: string,
-  orgId: string
-): Promise<Consent[]> {
-  return await tryFetch(`/api/orgs/${orgId}/users/${userId}/consents`, {
-    credentials: "include",
-  });
+  orgId: string,
+  pageUrl?: string
+): Promise<Consents> {
+  return await tryFetch(
+    pageUrl ?? `/api/orgs/${orgId}/users/${userId}/consents`,
+    {
+      credentials: "include",
+    }
+  );
 }
 
 export async function createMockAccount(
@@ -144,11 +152,15 @@ export async function updateMockAccount(
 
 export async function fetchMockAccounts(
   userId: string,
-  orgId: string
-): Promise<Account[]> {
-  return await tryFetch(`/api/orgs/${orgId}/users/${userId}/accounts`, {
-    credentials: "include",
-  });
+  orgId: string,
+  pageUrl?: string
+): Promise<Accounts> {
+  return await tryFetch(
+    pageUrl ?? `/api/orgs/${orgId}/users/${userId}/accounts`,
+    {
+      credentials: "include",
+    }
+  );
 }
 
 export async function deleteMockAccount(
@@ -166,23 +178,30 @@ export async function deleteMockAccount(
 }
 
 export async function fetchAuthUrl(): Promise<string> {
-  const res: { url: string } = await tryFetch("/api/directory/auth-url");
-  return res.url;
+  const res: { data: { url: string } } = await tryFetch(
+    "/api/directory/auth-url"
+  );
+  return res.data.url;
 }
 
 export async function fetchUser(): Promise<User> {
-  return await tryFetch(`/api/me`, {
+  const res: { data: User } = await tryFetch(`/api/me`, {
     credentials: "include",
   });
+  return res.data;
 }
 
 export async function fetchMockResources(
   userId: string,
-  orgId: string
-): Promise<Resource[]> {
-  return await tryFetch(`/api/orgs/${orgId}/users/${userId}/resources`, {
-    credentials: "include",
-  });
+  orgId: string,
+  pageUrl?: string
+): Promise<Resources> {
+  return await tryFetch(
+    pageUrl ?? `/api/orgs/${orgId}/users/${userId}/resources`,
+    {
+      credentials: "include",
+    }
+  );
 }
 
 export async function updateMockResource(

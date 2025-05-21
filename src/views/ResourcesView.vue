@@ -1,6 +1,19 @@
 <template>
   <LayoutComponent :links="sidebarLinks">
-    <h1 class="text-2xl font-semibold mb-6">Shared Resources</h1>
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-semibold">Shared Resources</h1>
+      <button
+        @click="reloadResources(undefined, true)"
+        class="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
+        :disabled="isReloading"
+        title="Reload users"
+      >
+        <ArrowPathIcon
+          class="h-5 w-5"
+          :class="{ 'animate-spin': isReloading }"
+        />
+      </button>
+    </div>
 
     <TableComponent v-if="resources.length">
       <template #header>
@@ -33,6 +46,13 @@
     <div v-else class="flex-1 flex items-center justify-center">
       <p class="text-gray-500">No resources found.</p>
     </div>
+    <PaginationComponent
+      :hasPrev="!!paginationLinks.prev"
+      :hasNext="!!paginationLinks.next"
+      :show="resources.length > 0"
+      @prev="reloadResources(paginationLinks.prev)"
+      @next="reloadResources(paginationLinks.next)"
+    />
 
     <transition name="slide-left">
       <SidePanelComponent
@@ -111,31 +131,34 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
+import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 import LayoutComponent from "../components/LayoutComponent.vue";
 import SidePanelComponent from "../components/SidePanelComponent.vue";
 import TableComponent from "../components/TableComponent.vue";
-import { ResourceStatus, type Resource } from "../types";
+import { ResourceStatus, type Links, type Resource } from "../types";
 import { fetchMockResources, updateMockResource } from "../utils";
 import { useToast } from "vue-toastification";
+import PaginationComponent from "../components/PaginationComponent.vue";
 
 const route = useRoute();
 const toast = useToast();
 
 const orgId = route.params.orgId as string;
 const userId = route.params.userId as string;
-
+const isReloading = ref(false);
 const sidebarLinks = [
+  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
   { label: "Consents", path: `/orgs/${orgId}/users/${userId}/consents` },
   {
     label: "Resources",
     path: `/orgs/${orgId}/users/${userId}/resources`,
   },
-  { label: "Accounts", path: `/orgs/${orgId}/users/${userId}/accounts` },
 ];
 
 const resources = ref<Resource[]>([]);
 const selectedResource = ref<Resource | null>(null);
 const originalResource = ref<Resource | null>(null);
+const paginationLinks = ref<Links>({});
 
 watch(
   () => selectedResource.value,
@@ -157,12 +180,23 @@ const selectResource = (resource: Resource) => {
 const saveResource = async () => {
   if (!selectedResource.value) return;
   await updateMockResource(userId, orgId, selectedResource.value);
-  resources.value = await fetchMockResources(userId, orgId);
+  await reloadResources();
   selectedResource.value = null;
   toast.success("Shared resource updated successfully!");
 };
 
-onMounted(async () => {
-  resources.value = await fetchMockResources(userId, orgId);
-});
+const reloadResources = async (url?: string, notify?: boolean) => {
+  url = paginationLinks.value.self ?? url;
+  isReloading.value = true;
+  try {
+    const { data, links } = await fetchMockResources(userId, orgId, url);
+    resources.value = data;
+    paginationLinks.value = links;
+    if (notify) toast.info("Resources reloaded");
+  } finally {
+    isReloading.value = false;
+  }
+};
+
+onMounted(reloadResources);
 </script>
