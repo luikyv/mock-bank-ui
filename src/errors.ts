@@ -25,7 +25,7 @@ export function handleError(router: Router) {
     switch (errInfo.code) {
       case ErrorCode.UNAUTHENTICATED:
         store.user = null;
-        toast.warning(`Seesion expired, please log in again`);
+        toast.info(`Please log in again`);
         router.push("/login");
         break;
       case ErrorCode.USER_ALREADY_EXISTS:

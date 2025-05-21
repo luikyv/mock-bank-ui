@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { computed, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "../stores";
 import { fetchUser } from "../utils";
@@ -86,7 +86,7 @@ const clearMockUser = () => {
   router.push(`/orgs/${org.value?.id}/users`);
 };
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (store.user == null) {
     store.user = await fetchUser();
   }
