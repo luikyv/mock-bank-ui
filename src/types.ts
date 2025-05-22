@@ -19,6 +19,7 @@ export interface MockUserRequest {
   username: string;
   name: string;
   cpf: string;
+  description?: string;
 }
 
 export interface MockUser {
@@ -26,6 +27,7 @@ export interface MockUser {
   username: string;
   name: string;
   cpf: string;
+  description?: string;
 }
 
 export interface MockUsers {

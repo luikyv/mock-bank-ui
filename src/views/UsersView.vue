@@ -77,6 +77,7 @@
                 required
               />
             </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Username</label
@@ -88,6 +89,7 @@
                 required
               />
             </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >CPF</label
@@ -105,6 +107,18 @@
               >
                 CPF must contain 11 numeric digits.
               </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Description</label
+              >
+              <textarea
+                v-model="newUser.description"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                rows="3"
+                placeholder="Optional description about the user"
+              ></textarea>
             </div>
           </div>
         </form>
@@ -162,6 +176,18 @@
             >
               CPF must contain 11 numeric digits.
             </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Description</label
+            >
+            <textarea
+              v-model="selectedUser.description"
+              class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              rows="4"
+              placeholder="Optional description about the user"
+            ></textarea>
           </div>
         </div>
 
@@ -252,7 +278,8 @@ const userWasEdited = computed(() => {
   return (
     selectedUser.value.name !== originalUser.value.name ||
     selectedUser.value.username !== originalUser.value.username ||
-    selectedUser.value.cpf !== originalUser.value.cpf
+    selectedUser.value.cpf !== originalUser.value.cpf ||
+    selectedUser.value.description !== originalUser.value.description
   );
 });
 
@@ -264,7 +291,7 @@ const selectUser = (user: MockUser) => {
 const createUser = async () => {
   if (!newUser.value || !newUserIsValid.value) return;
   await createMockUser(newUser.value, orgId);
-  reloadUsers();
+  await reloadUsers();
   newUser.value = null;
   toast.success("User created successfully!");
 };
@@ -272,7 +299,7 @@ const createUser = async () => {
 const saveUser = async () => {
   if (!selectedUser.value || !selectedUserIsValid.value) return;
   await updateMockUser(selectedUser.value.id, selectedUser.value, orgId);
-  reloadUsers();
+  await reloadUsers();
   selectedUser.value = null;
   toast.success("User updated successfully!");
 };
