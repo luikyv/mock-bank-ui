@@ -14,13 +14,9 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from "../stores";
 import { fetchAuthUrl } from "../utils";
 
-const store = useStore();
-
 async function directorySso() {
-  store.user = null;
   const authUrl = await fetchAuthUrl();
   window.location.href = authUrl;
 }

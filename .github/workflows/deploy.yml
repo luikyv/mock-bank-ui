@@ -1,0 +1,46 @@
+name: Deploy Frontend to S3
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE: arn:aws:iam::208072937240:role/mockbank-github-oidc
+  AWS_S3_BUCKET: mockbank-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          role-session-name: mockbank-github-ci
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3
+        run: aws s3 sync dist/ s3://$AWS_S3_BUCKET --acl public-read --delete
+
+    #   - name: Invalidate CloudFront cache
+    #     run: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+    #     env:
+    #       CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
