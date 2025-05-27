@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: us-east-1
   AWS_ROLE: arn:aws:iam::208072937240:role/mockbank-github-oidc
