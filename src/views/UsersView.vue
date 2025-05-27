@@ -117,7 +117,6 @@
                 v-model="newUser.description"
                 class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                 rows="3"
-                placeholder="Optional description about the user"
               ></textarea>
             </div>
           </div>
@@ -186,7 +185,6 @@
               v-model="selectedUser.description"
               class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               rows="4"
-              placeholder="Optional description about the user"
             ></textarea>
           </div>
         </div>
